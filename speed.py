@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright 2012 NIMA
+# Copyright 2012 nima
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 3 (the "License"); you may
