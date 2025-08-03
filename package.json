@@ -1,7 +1,7 @@
 {
   "name": "NIMA",
   "version": "1.0.8",
-  "description": "NIMA Bot WhatsApp Using Lib Baileys Multi Device",
+  "description": "Bot WhatsApp Using Lib Baileys Multi Device",
   "main": "start.js",
   "type": "commonjs",
   "scripts": {
@@ -15,7 +15,7 @@
     "bot-wa",
     "multi-device"
   ],
-  "author": "NIMA",
+  "author": "Nazedev",
   "license": "MIT",
   "directories": {
     "lib": "lib",
@@ -80,10 +80,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Nimeshamadhushan/NIMA-V3.git"
+    "url": "git+https://github.com/nazedev/hitori.git"
   },
   "bugs": {
-    "url": "https://github.com/Nimeshamadhushan/NIMA-V3/issues"
+    "url": "https://github.com/nazedev/hitori/issues"
   },
-  "homepage": "https://github.com/Nimeshamadhushan/NIMA-V3#readme"
+  "homepage": "https://github.com/nazedev/hitori#readme"
 }
