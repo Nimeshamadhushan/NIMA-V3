@@ -1,0 +1,3 @@
+{
+  "ignore": ["NIMA", "node_modules", "database", "logs"]
+}
