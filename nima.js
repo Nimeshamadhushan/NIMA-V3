@@ -55,7 +55,7 @@ const { unixTimestampSeconds, generateMessageTag, processTime, webApi, getRandom
 
 module.exports = nima = async (nima, m, msg, store) => {
 	const botNumber = nima.decodeJid(nima.user.id);
-	const  = db?.set?.[botNumber]?.owner?.map(x => x.id) || owner;
+	const ownerNumber = db?.set?.[botNumber]?.owner?.map(x => x.id) || owner;
 	
 	try {
 		
@@ -76,7 +76,7 @@ module.exports = nima = async (nima, m, msg, store) => {
 		(m.type == 'protocolMessage') ? (m.message.protocolMessage?.editedMessage?.extendedTextMessage?.text || m.message.protocolMessage?.editedMessage?.conversation || m.message.protocolMessage?.editedMessage?.imageMessage?.caption || m.message.protocolMessage?.editedMessage?.videoMessage?.caption || '') : '') || '';
 		
 		const budy = (typeof m.text == 'string' ? m.text : '')
-		const isCreator = isOwner = [botNumber, ...].filter(v => typeof v === 'string').map(v => v.replace(/[^0-9]/g, '')).includes(m.sender.split('@')[0])
+		const isCreator = isOwner = [botNumber, ...ownerNumber].filter(v => typeof v === 'string').map(v => v.replace(/[^0-9]/g, '')).includes(m.sender.split('@')[0])
 		const cases = db.cases ? db.cases : (db.cases = [...fs.readFileSync('./nima.js', 'utf-8').matchAll(/case\s+['"]([^'"]+)['"]/g)].map(match => match[1]));
 		const prefix = isCreator ? (/^[°•π÷×¶∆£¢€¥®™+✓_=|~!?@()#,'"*+÷/\%^&.©^]/gi.test(body) ? body.match(/^[°•π÷×¶∆£¢€¥®™+✓_=|~!?@()#,'"*+÷/\%^&.©^]/gi)[0] : /[\uD800-\uDBFF][\uDC00-\uDFFF]/gi.test(body) ? body.match(/[\uD800-\uDBFF][\uDC00-\uDFFF]/gi)[0] : listprefix.find(a => body?.startsWith(a)) || '') : db.set[botNumber].multiprefix ? (/^[°•π÷×¶∆£¢€¥®™+✓_=|~!?@()#,'"*+÷/\%^&.©^]/gi.test(body) ? body.match(/^[°•π÷×¶∆£¢€¥®™+✓_=|~!?@()#,'"*+÷/\%^&.©^]/gi)[0] : /[\uD800-\uDBFF][\uDC00-\uDFFF]/gi.test(body) ? body.match(/[\uD800-\uDBFF][\uDC00-\uDFFF]/gi)[0] : listprefix.find(a => body?.startsWith(a)) || '¿') : listprefix.find(a => body?.startsWith(a)) || '¿'
 		const isCmd = body.startsWith(prefix)
@@ -167,7 +167,7 @@ module.exports = nima = async (nima, m, msg, store) => {
 					fs.writeFileSync(datanya, JSON.stringify(global.db, null, 2), 'utf-8');
 				}
 				let tglnya = new Date().toISOString().replace(/[:.]/g, '-');
-				for (let o of ) {
+				for (let o of ownerNumber) {
 					try {
 						await nima.sendMessage(o, { document: fs.readFileSync(datanya), mimetype: 'application/json', fileName: tglnya + '_database.json' })
 						console.log(`[AUTO BACKUP] Backup berhasil dikirim ke ${o}`);
@@ -808,7 +808,7 @@ module.exports = nima = async (nima, m, msg, store) => {
 			break
 			case 'leave': {
 				if (!isCreator) return m.reply(mess.owner)
-				await nima.groupLeave(m.chat).then(() => nima.sendFromOwner(, 'Sukses Keluar Dari Grup', m, { contextInfo: { isForwarded: true }})).catch(e => {});
+				await nima.groupLeave(m.chat).then(() => nima.sendFromOwner(ownerNumber, 'Sukses Keluar Dari Grup', m, { contextInfo: { isForwarded: true }})).catch(e => {});
 			}
 			break
 			case 'clearchat': {
@@ -1551,7 +1551,7 @@ module.exports = nima = async (nima, m, msg, store) => {
 			
 			// bot Menu
 			case 'owner': case 'listowner': {
-				await nima.sendContact(m.chat, , m);
+				await nima.sendContact(m.chat, ownerNumber, m);
 			}
 			break
 			case 'profile': case 'cek': {
@@ -1589,7 +1589,7 @@ module.exports = nima = async (nima, m, msg, store) => {
 			case 'req': case 'request': {
 				if (!text) return m.reply('Mau Request apa ke Owner?')
 				await m.reply(`*Request Telah Terkirim Ke Owner*\n_Terima Kasih🙏_`)
-				await nima.sendFromOwner(, `Pesan Dari : @${m.sender.split('@')[0]}\nUntuk Owner\n\nRequest ${text}`, m, { contextInfo: { mentionedJid: [m.sender], isForwarded: true }})
+				await nima.sendFromOwner(ownerNumber, `Pesan Dari : @${m.sender.split('@')[0]}\nUntuk Owner\n\nRequest ${text}`, m, { contextInfo: { mentionedJid: [m.sender], isForwarded: true }})
 			}
 			break
 			case 'totalfitur': {
@@ -3262,7 +3262,7 @@ module.exports = nima = async (nima, m, msg, store) => {
 			case 'suitpvp': case 'suit': {
 				if (Object.values(suit).find(roof => roof.id.startsWith('suit') && [roof.p, roof.p2].includes(m.sender))) return m.reply(`Selesaikan suit mu yang sebelumnya`)
 				if (m.mentionedJid[0] === m.sender) return m.reply(`Tidak bisa bermain dengan diri sendiri !`)
-				if (!m.mentionedJid[0]) return m.reply(`_Siapa yang ingin kamu tantang?_\nTag orangnya..\n\nContoh : ${prefix}suit @${[0]}`, m.chat, { mentions: [[1] + '@s.whatsapp.net'] })
+				if (!m.mentionedJid[0]) return m.reply(`_Siapa yang ingin kamu tantang?_\nTag orangnya..\n\nContoh : ${prefix}suit @${ownerNumber[0]}`, m.chat, { mentions: [ownerNumber[1] + '@s.whatsapp.net'] })
 				if (Object.values(suit).find(roof => roof.id.startsWith('suit') && [roof.p, roof.p2].includes(m.mentionedJid[0]))) return m.reply(`Orang yang kamu tantang sedang bermain suit bersama orang lain :(`)
 				let caption = `_*SUIT PvP*_\n\n@${m.sender.split`@`[0]} menantang @${m.mentionedJid[0].split`@`[0]} untuk bermain suit\n\nSilahkan @${m.mentionedJid[0].split`@`[0]} untuk ketik terima/tolak`
 				let id = 'suit_' + Date.now();
@@ -3954,7 +3954,7 @@ module.exports = nima = async (nima, m, msg, store) => {
 ╭─┴─❍「 *bot INFO* 」❍
 ├ *Nama bot* : ${db?.set?.[botNumber]?.botname || 'nima bot'}
 ├ *Powered* : @${'0@s.whatsapp.net'.split('@')[0]}
-├ *Owner* : 94726800969
+├ *Owner* : @${ownerNumber[0].split('@')[0]}
 ├ *Mode* : ${nima.public ? 'Public' : 'Self'}
 ├ *Prefix* :${set.multiprefix ? '「 MULTI-PREFIX 」' : ' *'+prefix+'*' }
 ├ *Premium Feature* : 🔸️
@@ -4214,7 +4214,7 @@ module.exports = nima = async (nima, m, msg, store) => {
 					pageCount: '999',
 					caption: menunya,
 					contextInfo: {
-						mentionedJid: [m.sender, '0@s.whatsapp.net', [0] + '@s.whatsapp.net'],
+						mentionedJid: [m.sender, '0@s.whatsapp.net', ownerNumber[0] + '@s.whatsapp.net'],
 						forwardingScore: 10,
 						isForwarded: true,
 						forwardedg.usMessageInfo: {
@@ -4577,7 +4577,7 @@ module.exports = nima = async (nima, m, msg, store) => {
 		if (errorCache[errorKey].length >= 3) return;
 		errorCache[errorKey].push(now);
 		m.reply('Error: ' + (e?.name || e?.code || e?.output?.statusCode || e?.status || 'Tidak diketahui') + '\nLog Error Telah dikirim ke Owner\n\n')
-		return nima.sendFromOwner(, `Halo sayang, sepertinya ada yang error nih, jangan lupa diperbaiki ya\n\nVersion : *${require('./package.json').version}*\n\n*Log error:*\n\n` + util.format(e), m, { contextInfo: { isForwarded: true }})
+		return nima.sendFromOwner(ownerNumber, `Halo sayang, sepertinya ada yang error nih, jangan lupa diperbaiki ya\n\nVersion : *${require('./package.json').version}*\n\n*Log error:*\n\n` + util.format(e), m, { contextInfo: { isForwarded: true }})
 	}
 }
 
