@@ -1,3 +1,24 @@
+##NIMA V3
+
+
+
+<div align="center"> 
+  <a href="https://git.io/typing-svg"> 
+    <img src="https://readme-typing-svg.demolab.com?font=Ribeye&size=50&pause=1000&color=33ff00&center=true&width=910&height=100&lines=NIMA-Bot;Multi+Device+Whatsapp+Bot;Coded+By+NIMA" alt="Typing SVG" />
+  </a> 
+</div> 
+
+<div align="center"> 
+  <a href="https://wa.me/+94726800969"> 
+    <img src="https://i.postimg.cc/029xmZVt/IMG-20250801-003906-211.jpg" alt="NIMA BOT" height="300"> 
+  </a> 
+</div>
+
+---
+
+
+
+
 ## Information
 
 <div align="center">
