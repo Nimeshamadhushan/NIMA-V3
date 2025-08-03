@@ -2,7 +2,7 @@ const fs = require('fs');
 const chalk = require('chalk');
 
 /*
-	* Create By NIMA
+	* Create By nima
 	* Follow https://github.com/Nimeshamadhushan
 	* Whatsapp : https://chat.whatsapp.com/HLBP338VvUC0ms5NqCkSSO?mode=ac_t
 */
@@ -10,8 +10,8 @@ const chalk = require('chalk');
 //~~~~~~~~~~~~< GLOBAL SETTINGS >~~~~~~~~~~~~\\
 
 global.owner = ['94726800969'] //['628','628'] 2 owner atau lebih
-global.author = 'NIMA'
-global.botname = 'NIMA Bot'
+global.author = 'nima'
+global.botname = 'nima Bot'
 global.packname = 'Bot WhatsApp'
 global.listprefix = ['+','!','.']
 
@@ -30,7 +30,7 @@ global.number_bot = '' // Kalo pake panel bisa masukin nomer di sini, jika belum
 global.fake = {
 	anonim: 'https://telegra.ph/file/95670d63378f7f4210f03.png',
 	thumbnailUrl: 'https://telegra.ph/file/fe4843a1261fc414542c4.jpg',
-	thumbnail: fs.readFileSync('./src/media/NIMA.png'),
+	thumbnail: fs.readFileSync('./src/media/nima.png'),
 	docs: fs.readFileSync('./src/media/fake.pdf'),
 	listfakedocs: ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','application/vnd.openxmlformats-officedocument.presentationml.presentation','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/pdf'],
 }
@@ -90,4 +90,3 @@ fs.watchFile(file, () => {
 	delete require.cache[file]
 	require(file)
 });
-
