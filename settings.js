@@ -11,7 +11,7 @@ const chalk = require('chalk');
 
 global.owner = ['94726800969'] //['628','628'] 2 owner atau lebih
 global.author = 'NIMA'
-global.botname = 'NIMAi Bot'
+global.botname = 'NIMA Bot'
 global.packname = 'Bot WhatsApp'
 global.listprefix = ['+','!','.']
 
@@ -90,3 +90,4 @@ fs.watchFile(file, () => {
 	delete require.cache[file]
 	require(file)
 });
+
