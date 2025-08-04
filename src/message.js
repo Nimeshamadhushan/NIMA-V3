@@ -14,14 +14,14 @@ const { isUrl, getGroupAdmins, generateMessageTag, getBuffer, getSizeMedia, fetc
 const { jidNormalizedUser, proto, getBinaryNodeChildren, getBinaryNodeChildString, getBinaryNodeChild, generateMessageIDV2, jidEncode, encodeSignedDeviceIdentity, generateWAMessageContent, generateForwardMessageContent, prepareWAMessageMedia, delay, areJidsSameUser, extractMessageContent, generateMessageID, downloadContentFromMessage, generateWAMessageFromContent, jidDecode, generateWAMessage, toBuffer, getContentType, WAMessageStubType, getDevice } = require('baileys');
 
 /*
-	* Create By nima
+	* Create By NIMA
 	* Follow https://github.com/Nimeshamadhushan
 	* Whatsapp : https://chat.whatsapp.com/HLBP338VvUC0ms5NqCkSSO?mode=ac_t
 */
 
-async function GroupUpdate(nima, m, store) {
+async function GroupUpdate(NIMA, m, store) {
 	if (!m.messageStubType || !m.isGroup) return
-	if (global.db?.groups?.[m.chat] && store?.groupMetadata?.[m.chat] && nima.public) {
+	if (global.db?.groups?.[m.chat] && store?.groupMetadata?.[m.chat] && NIMA.public) {
 		const admin = `@${m.sender.split('@')[0]}`
 		const metadata = store.groupMetadata[m.chat];
 		const normalizedTarget = m.messageStubParameters[0]
@@ -40,13 +40,13 @@ async function GroupUpdate(nima, m, store) {
 			132: 'mereset link grup!',
 		}
 		if (global.db?.groups?.[m.chat]?.setinfo && messages[m.messageStubType]) {
-			await nima.sendMessage(m.chat, { text: `${admin} ${messages[m.messageStubType]}`, mentions: [m.sender, ...(normalizedTarget?.includes('@') ? [`${normalizedTarget}`] : [])]}, { ephemeralExpiration: m.expiration || m?.metadata?.ephemeralDuration || store?.messages[m.chat]?.array?.slice(-1)[0]?.metadata?.ephemeralDuration || 0 })
+			await NIMA.sendMessage(m.chat, { text: `${admin} ${messages[m.messageStubType]}`, mentions: [m.sender, ...(normalizedTarget?.includes('@') ? [`${normalizedTarget}`] : [])]}, { ephemeralExpiration: m.expiration || m?.metadata?.ephemeralDuration || store?.messages[m.chat]?.array?.slice(-1)[0]?.metadata?.ephemeralDuration || 0 })
 		} else if (m.messageStubType == 20) {
-			store.groupMetadata[m.chat] = await nima.groupMetadata(m.chat).catch(e => ({}));
+			store.groupMetadata[m.chat] = await NIMA.groupMetadata(m.chat).catch(e => ({}));
 		} else if (m.messageStubType == 27) {
 			if (!metadata.participants.some(a => a.id == normalizedTarget)) metadata.participants.push({ ...(metadata.addressingMode === 'lid' ? { id: '', lid: normalizedTarget } : { id: normalizedTarget, lid: '' }), admin: null });
 		} else if (m.messageStubType == 28 || m.messageStubType == 32) {
-			if (m.fromMe && ((jidNormalizedUser(nima.user.id) == normalizedTarget) || (jidNormalizedUser(nima.user.lid) == normalizedTarget))) {
+			if (m.fromMe && ((jidNormalizedUser(NIMA.user.id) == normalizedTarget) || (jidNormalizedUser(NIMA.user.lid) == normalizedTarget))) {
 				delete store.messages[m.chat];
 				delete store.presences[m.chat];
 				delete store.groupMetadata[m.chat];
@@ -65,7 +65,7 @@ async function GroupUpdate(nima, m, store) {
 	}
 }
 
-async function GroupParticipantsUpdate(nima, { id, participants, author, action }, store) {
+async function GroupParticipantsUpdate(NIMA, { id, participants, author, action }, store) {
 	try {
 		function updateAdminStatus(participants, metadataParticipants, status) {
 			for (const participant of metadataParticipants) {
@@ -80,7 +80,7 @@ async function GroupParticipantsUpdate(nima, { id, participants, author, action 
 				const participant = metadata.participants.find(a => a.id == jidNormalizedUser(n))
 				let profile;
 				try {
-					profile = await nima.profilePictureUrl(n, 'image');
+					profile = await NIMA.profilePictureUrl(n, 'image');
 				} catch {
 					profile = 'https://telegra.ph/file/95670d63378f7f4210f03.png';
 				}
@@ -90,7 +90,7 @@ async function GroupParticipantsUpdate(nima, { id, participants, author, action 
 					if (!participant) metadata.participants.push({ ...(metadata.addressingMode === 'lid' ? { id: '', lid: jidNormalizedUser(n) } : { id: jidNormalizedUser(n), lid: '' }), admin: null });
 				} else if (action === 'remove') {
 					if (db.groups[id].leave) messageText = db.groups[id]?.text?.setleave || `@\nLeaving From ${metadata.subject}`;
-					if ((jidNormalizedUser(nima.user.lid) == jidNormalizedUser(n)) || (jidNormalizedUser(nima.user.id) == jidNormalizedUser(n))) {
+					if ((jidNormalizedUser(NIMA.user.lid) == jidNormalizedUser(n)) || (jidNormalizedUser(NIMA.user.id) == jidNormalizedUser(n))) {
 						delete store.messages[id];
 						delete store.presences[id];
 						delete store.groupMetadata[id];
@@ -103,8 +103,8 @@ async function GroupParticipantsUpdate(nima, { id, participants, author, action 
 					if (db.groups[id].demote) messageText = db.groups[id]?.text?.setdemote || `@\nDemote From ${metadata.subject}\nBy @admin`;
 					updateAdminStatus(participants, metadata.participants, null);
 				}
-				if (messageText && nima.public) {
-					await nima.sendMessage(id, {
+				if (messageText && NIMA.public) {
+					await NIMA.sendMessage(id, {
 						text: messageText.replace('@subject', author ? `${metadata.subject}` : '@subject').replace('@admin', author ? `@${author.split('@')[0]}` : '@admin').replace(/(?<=\s|^)@(?!\w)/g, `@${n.split('@')[0]}`),
 						contextInfo: {
 							mentionedJid: [n, author],
@@ -126,9 +126,9 @@ async function GroupParticipantsUpdate(nima, { id, participants, author, action 
 	}
 }
 
-async function LoadDataBase(nima, m) {
+async function LoadDataBase(NIMA, m) {
 	try {
-		const botNumber = await nima.decodeJid(nima.user.id);
+		const botNumber = await NIMA.decodeJid(NIMA.user.id);
 		let game = global.db.game || {};
 		let premium = global.db.premium || [];
 		let user = global.db.users[m.sender] || {};
@@ -155,9 +155,9 @@ async function LoadDataBase(nima, m) {
 			grouponly: true,
 			multiprefix: false,
 			privateonly: true,
-			author: global.author || 'nima',
+			author: global.author || 'NIMA',
 			autobackup: false,
-			botname: global.botname || 'nima Bot',
+			botname: global.botname || 'NIMA Bot',
 			packname: global.packname || 'Bot WhatsApp',
 			template: 'documentMessage',
 			owner: global.owner.map(id => ({ id, lock: true })),
@@ -247,9 +247,9 @@ async function LoadDataBase(nima, m) {
 	}
 }
 
-async function MessagesUpsert(nima, message, store) {
+async function MessagesUpsert(NIMA, message, store) {
 	try {
-		let botNumber = await nima.decodeJid(nima.user.id);
+		let botNumber = await NIMA.decodeJid(NIMA.user.id);
 		const msg = message.messages[0];
 		const remoteJid = msg.key.remoteJid;
 		store.messages[remoteJid] ??= {};
@@ -265,16 +265,16 @@ async function MessagesUpsert(nima, message, store) {
 			const removed = store.messages[remoteJid].array.shift();
 			store.messages[remoteJid].keyId.delete(removed.key.id);
 		}
-		if (!store.groupMetadata || Object.keys(store.groupMetadata).length === 0) store.groupMetadata ??= await nima.groupFetchAllParticipating().catch(e => ({}));
+		if (!store.groupMetadata || Object.keys(store.groupMetadata).length === 0) store.groupMetadata ??= await NIMA.groupFetchAllParticipating().catch(e => ({}));
 		const type = msg.message ? (getContentType(msg.message) || Object.keys(msg.message)[0]) : '';
-		const m = await Serialize(nima, msg, store)
-		require('../nima')(nima, m, msg, store);
+		const m = await Serialize(NIMA, msg, store)
+		require('../NIMA')(NIMA, m, msg, store);
 		if (db?.set?.[botNumber]?.readsw && msg.key.remoteJid === 'status@broadcast') {
-			await nima.readMessages([msg.key]);
-			if (/protocolMessage/i.test(type)) await nima.sendFromOwner(global.db?.set?.[botNumber]?.owner?.map(x => x.id) || global.owner, 'Status dari @' + msg.key.participant.split('@')[0] + ' Telah dihapus', msg, { mentions: [msg.key.participant] });
+			await NIMA.readMessages([msg.key]);
+			if (/protocolMessage/i.test(type)) await NIMA.sendFromOwner(global.db?.set?.[botNumber]?.owner?.map(x => x.id) || global.owner, 'Status dari @' + msg.key.participant.split('@')[0] + ' Telah dihapus', msg, { mentions: [msg.key.participant] });
 			if (/(audioMessage|imageMessage|videoMessage|extendedTextMessage)/i.test(type)) {
 				let keke = (type == 'extendedTextMessage') ? `Story Teks Berisi : ${msg.message.extendedTextMessage.text ? msg.message.extendedTextMessage.text : ''}` : (type == 'imageMessage') ? `Story Gambar ${msg.message.imageMessage.caption ? 'dengan Caption : ' + msg.message.imageMessage.caption : ''}` : (type == 'videoMessage') ? `Story Video ${msg.message.videoMessage.caption ? 'dengan Caption : ' + msg.message.videoMessage.caption : ''}` : (type == 'audioMessage') ? 'Story Audio' : '\nTidak diketahui cek saja langsung'
-				await nima.sendFromOwner(global.db?.set?.[botNumber]?.owner?.map(x => x.id) || global.owner, `Melihat story dari @${msg.key.participant.split('@')[0]}\n${keke}`, msg, { mentions: [msg.key.participant] });
+				await NIMA.sendFromOwner(global.db?.set?.[botNumber]?.owner?.map(x => x.id) || global.owner, `Melihat story dari @${msg.key.participant.split('@')[0]}\n${keke}`, msg, { mentions: [msg.key.participant] });
 			}
 		}
 	} catch (e) {
@@ -282,10 +282,10 @@ async function MessagesUpsert(nima, message, store) {
 	}
 }
 
-async function Solving(nima, store) {
-	nima.serializeM = (m) => MessagesUpsert(nima, m, store)
+async function Solving(NIMA, store) {
+	NIMA.serializeM = (m) => MessagesUpsert(NIMA, m, store)
 	
-	nima.decodeJid = (jid) => {
+	NIMA.decodeJid = (jid) => {
 		if (!jid) return jid
 		if (/:\d+@/gi.test(jid)) {
 			let decode = jidDecode(jid) || {}
@@ -293,7 +293,7 @@ async function Solving(nima, store) {
 		} else return jid
 	}
 	
-	nima.findJidByLid = (lid, store) => {
+	NIMA.findJidByLid = (lid, store) => {
 		for (const contact of Object.values(store.contacts)) {
 			if (contact.lid === lid) {
 				return contact.id;
@@ -302,10 +302,10 @@ async function Solving(nima, store) {
 		return null;
 	}
 	
-	nima.getName = (jid, withoutContact  = false) => {
-		const id = nima.decodeJid(jid);
+	NIMA.getName = (jid, withoutContact  = false) => {
+		const id = NIMA.decodeJid(jid);
 		if (id.endsWith('@g.us')) {
-			const groupInfo = store.contacts[id] || (store.groupMetadata[id] ? store.groupMetadata[id] : (store.groupMetadata[id] = nima.groupMetadata(id))) || {};
+			const groupInfo = store.contacts[id] || (store.groupMetadata[id] ? store.groupMetadata[id] : (store.groupMetadata[id] = NIMA.groupMetadata(id))) || {};
 			return Promise.resolve(groupInfo.name || groupInfo.subject || PhoneNumber('+' + id.replace('@g.us', '')).getNumber('international'));
 		} else {
 			if (id === '0@s.whatsapp.net') {
@@ -316,19 +316,19 @@ async function Solving(nima, store) {
 		}
 	}
 	
-	nima.sendContact = async (jid, kon, quoted = '', opts = {}) => {
+	NIMA.sendContact = async (jid, kon, quoted = '', opts = {}) => {
 		let list = []
 		for (let i of kon) {
 			list.push({
-				displayName: await nima.getName(i + '@s.whatsapp.net'),
-				vcard: `BEGIN:VCARD\nVERSION:3.0\nN:${await nima.getName(i + '@s.whatsapp.net')}\nFN:${await nima.getName(i + '@s.whatsapp.net')}\nitem1.TEL;waid=${i}:${i}\nitem1.X-ABLabel:Ponsel\nitem2.ADR:;;Indonesia;;;;\nitem2.X-ABLabel:Region\nEND:VCARD` //vcard: `BEGIN:VCARD\nVERSION:3.0\nN:${await nima.getName(i + '@s.whatsapp.net')}\nFN:${await nima.getName(i + '@s.whatsapp.net')}\nitem1.TEL;waid=${i}:${i}\nitem1.X-ABLabel:Ponsel\nitem2.EMAIL;type=INTERNET:whatsapp@gmail.com\nitem2.X-ABLabel:Email\nitem3.URL:https://instagram.com/nima_dev\nitem3.X-ABLabel:Instagram\nitem4.ADR:;;Indonesia;;;;\nitem4.X-ABLabel:Region\nEND:VCARD`
+				displayName: await NIMA.getName(i + '@s.whatsapp.net'),
+				vcard: `BEGIN:VCARD\nVERSION:3.0\nN:${await NIMA.getName(i + '@s.whatsapp.net')}\nFN:${await NIMA.getName(i + '@s.whatsapp.net')}\nitem1.TEL;waid=${i}:${i}\nitem1.X-ABLabel:Ponsel\nitem2.ADR:;;Indonesia;;;;\nitem2.X-ABLabel:Region\nEND:VCARD` //vcard: `BEGIN:VCARD\nVERSION:3.0\nN:${await NIMA.getName(i + '@s.whatsapp.net')}\nFN:${await NIMA.getName(i + '@s.whatsapp.net')}\nitem1.TEL;waid=${i}:${i}\nitem1.X-ABLabel:Ponsel\nitem2.EMAIL;type=INTERNET:whatsapp@gmail.com\nitem2.X-ABLabel:Email\nitem3.URL:https://instagram.com/NIMA_dev\nitem3.X-ABLabel:Instagram\nitem4.ADR:;;Indonesia;;;;\nitem4.X-ABLabel:Region\nEND:VCARD`
 			})
 		}
-		nima.sendMessage(jid, { contacts: { displayName: `${list.length} Kontak`, contacts: list }, ...opts }, { quoted, ephemeralExpiration: quoted?.expiration || quoted?.metadata?.ephemeralDuration || store?.messages[jid]?.array?.slice(-1)[0]?.metadata?.ephemeralDuration || 0 });
+		NIMA.sendMessage(jid, { contacts: { displayName: `${list.length} Kontak`, contacts: list }, ...opts }, { quoted, ephemeralExpiration: quoted?.expiration || quoted?.metadata?.ephemeralDuration || store?.messages[jid]?.array?.slice(-1)[0]?.metadata?.ephemeralDuration || 0 });
 	}
 	
-	nima.profilePictureUrl = async (jid, type = 'image', timeoutMs) => {
-		const result = await nima.query({
+	NIMA.profilePictureUrl = async (jid, type = 'image', timeoutMs) => {
+		const result = await NIMA.query({
 			tag: 'iq',
 			attrs: {
 				target: jidNormalizedUser(jid),
@@ -347,8 +347,8 @@ async function Solving(nima, store) {
 		return child?.attrs?.url;
 	}
 	
-	nima.setStatus = (status) => {
-		nima.query({
+	NIMA.setStatus = (status) => {
+		NIMA.query({
 			tag: 'iq',
 			attrs: {
 				to: '@s.whatsapp.net',
@@ -364,7 +364,7 @@ async function Solving(nima, store) {
 		return status
 	}
 	
-	nima.extractGroupMetadata = (result) => {
+	NIMA.extractGroupMetadata = (result) => {
 		const group = getBinaryNodeChild(result, 'group');
 		const descChild = getBinaryNodeChild(group, 'description');
 		const desc = descChild ? getBinaryNodeChildString(descChild, 'body') : undefined;
@@ -400,8 +400,8 @@ async function Solving(nima, store) {
 	}
 	
 	
-	nima.groupMetadata = async (jid) => {
-		const result = await nima.query({
+	NIMA.groupMetadata = async (jid) => {
+		const result = await NIMA.query({
 			tag: 'iq',
 			attrs: {
 				type: 'get',
@@ -410,17 +410,17 @@ async function Solving(nima, store) {
 			},
 			content: [{ tag: 'query', attrs: { request: 'interactive' }}]
 		});
-		return nima.extractGroupMetadata(result);
+		return NIMA.extractGroupMetadata(result);
 	};
 	
-	nima.groupFetchAllParticipating = async () => {
-		const result = await nima.query({ tag: 'iq', attrs: { to: '@g.us', xmlns: 'w:g2', type: 'get' }, content: [{ tag: 'participating', attrs: {}, content: [{ tag: 'participants', attrs: {}}, { tag: 'description', attrs: {}}]}]});
+	NIMA.groupFetchAllParticipating = async () => {
+		const result = await NIMA.query({ tag: 'iq', attrs: { to: '@g.us', xmlns: 'w:g2', type: 'get' }, content: [{ tag: 'participating', attrs: {}, content: [{ tag: 'participants', attrs: {}}, { tag: 'description', attrs: {}}]}]});
 		const data = {};
 		const groupsChild = getBinaryNodeChild(result, 'groups');
 		if (groupsChild) {
 			const groups = getBinaryNodeChildren(groupsChild, 'group');
 			for (const groupNode of groups) {
-				const meta = nima.extractGroupMetadata({
+				const meta = NIMA.extractGroupMetadata({
 					tag: 'result',
 					attrs: {},
 					content: [groupNode]
@@ -428,29 +428,29 @@ async function Solving(nima, store) {
 				data[meta.id] = meta;
 			}
 		}
-		nima.ev.emit('groups.update', Object.values(data));
+		NIMA.ev.emit('groups.update', Object.values(data));
 		return data;
 	}
 
-	nima.sendPoll = (jid, name = '', values = [], quoted, selectableCount = 1) => {
-		return nima.sendMessage(jid, { poll: { name, values, selectableCount }}, { quoted, ephemeralExpiration: quoted?.expiration || quoted?.metadata?.ephemeralDuration || store?.messages[jid]?.array?.slice(-1)[0]?.metadata?.ephemeralDuration || 0 })
+	NIMA.sendPoll = (jid, name = '', values = [], quoted, selectableCount = 1) => {
+		return NIMA.sendMessage(jid, { poll: { name, values, selectableCount }}, { quoted, ephemeralExpiration: quoted?.expiration || quoted?.metadata?.ephemeralDuration || store?.messages[jid]?.array?.slice(-1)[0]?.metadata?.ephemeralDuration || 0 })
 	}
 	
-	nima.sendFileUrl = async (jid, url, caption, quoted, options = {}) => {
+	NIMA.sendFileUrl = async (jid, url, caption, quoted, options = {}) => {
 		const quotedOptions = { quoted, ephemeralExpiration: quoted?.expiration || quoted?.metadata?.ephemeralDuration || store?.messages[jid]?.array?.slice(-1)[0]?.metadata?.ephemeralDuration || 0 }
 		async function getFileUrl(res, mime) {
 			if (mime && mime.includes('gif')) {
-				return nima.sendMessage(jid, { video: res.data, caption: caption, gifPlayback: true, ...options }, quotedOptions);
+				return NIMA.sendMessage(jid, { video: res.data, caption: caption, gifPlayback: true, ...options }, quotedOptions);
 			} else if (mime && mime === 'application/pdf') {
-				return nima.sendMessage(jid, { document: res.data, mimetype: 'application/pdf', caption: caption, ...options }, quotedOptions);
+				return NIMA.sendMessage(jid, { document: res.data, mimetype: 'application/pdf', caption: caption, ...options }, quotedOptions);
 			} else if (mime && mime.includes('image')) {
-				return nima.sendMessage(jid, { image: res.data, caption: caption, ...options }, quotedOptions);
+				return NIMA.sendMessage(jid, { image: res.data, caption: caption, ...options }, quotedOptions);
 			} else if (mime && mime.includes('video')) {
-				return nima.sendMessage(jid, { video: res.data, caption: caption, mimetype: 'video/mp4', ...options }, quotedOptions);
+				return NIMA.sendMessage(jid, { video: res.data, caption: caption, mimetype: 'video/mp4', ...options }, quotedOptions);
 			} else if (mime && mime.includes('webp') && !/.jpg|.jpeg|.png/.test(url)) {
-				return nima.sendAsSticker(jid, res.data, quoted, options);
+				return NIMA.sendAsSticker(jid, res.data, quoted, options);
 			} else if (mime && mime.includes('audio')) {
-				return nima.sendMessage(jid, { audio: res.data, mimetype: 'audio/mpeg', ...options }, quotedOptions);
+				return NIMA.sendMessage(jid, { audio: res.data, mimetype: 'audio/mpeg', ...options }, quotedOptions);
 			}
 		}
 		const axioss = axios.create({
@@ -466,7 +466,7 @@ async function Solving(nima, store) {
 		return hasil
 	}
 	
-	nima.sendGroupInvite = async (jid, participant, inviteCode, inviteExpiration, groupName = 'Unknown Subject', caption = 'Invitation to join my WhatsApp group', jpegThumbnail = null, options = {}) => {
+	NIMA.sendGroupInvite = async (jid, participant, inviteCode, inviteExpiration, groupName = 'Unknown Subject', caption = 'Invitation to join my WhatsApp group', jpegThumbnail = null, options = {}) => {
 		const msg = proto.Message.fromObject({
 			groupInviteMessage: {
 				inviteCode,
@@ -481,25 +481,25 @@ async function Solving(nima, store) {
 			}
 		});
 		const message = generateWAMessageFromContent(participant, msg, options);
-		const invite = await nima.relayMessage(participant, message.message, { messageId: message.key.id })
+		const invite = await NIMA.relayMessage(participant, message.message, { messageId: message.key.id })
 		return invite
 	}
 	
-	nima.sendFromOwner = async (jid, text, quoted, options = {}) => {
+	NIMA.sendFromOwner = async (jid, text, quoted, options = {}) => {
 		for (const a of jid) {
-			await nima.sendMessage(a.replace(/[^0-9]/g, '') + '@s.whatsapp.net', { text, ...options }, { quoted, ephemeralExpiration: quoted?.expiration || quoted?.metadata?.ephemeralDuration || store?.messages[jid]?.array?.slice(-1)[0]?.metadata?.ephemeralDuration || 0 })
+			await NIMA.sendMessage(a.replace(/[^0-9]/g, '') + '@s.whatsapp.net', { text, ...options }, { quoted, ephemeralExpiration: quoted?.expiration || quoted?.metadata?.ephemeralDuration || store?.messages[jid]?.array?.slice(-1)[0]?.metadata?.ephemeralDuration || 0 })
 		}
 	}
 	
-	nima.sendText = async (jid, text, quoted, options = {}) => nima.sendMessage(jid, { text: text, mentions: [...text.matchAll(/@(\d{0,16})/g)].map(v => v[1] + '@s.whatsapp.net'), ...options }, { quoted, ephemeralExpiration: quoted?.expiration || quoted?.metadata?.ephemeralDuration || store?.messages[jid]?.array?.slice(-1)[0]?.metadata?.ephemeralDuration || 0 })
+	NIMA.sendText = async (jid, text, quoted, options = {}) => NIMA.sendMessage(jid, { text: text, mentions: [...text.matchAll(/@(\d{0,16})/g)].map(v => v[1] + '@s.whatsapp.net'), ...options }, { quoted, ephemeralExpiration: quoted?.expiration || quoted?.metadata?.ephemeralDuration || store?.messages[jid]?.array?.slice(-1)[0]?.metadata?.ephemeralDuration || 0 })
 	
-	nima.sendAsSticker = async (jid, path, quoted, options = {}) => {
+	NIMA.sendAsSticker = async (jid, path, quoted, options = {}) => {
 		const buff = Buffer.isBuffer(path) ? path : /^data:.*?\/.*?;base64,/i.test(path) ? Buffer.from(path.split`,`[1], 'base64') : /^https?:\/\//.test(path) ? await (await getBuffer(path)) : fs.existsSync(path) ? fs.readFileSync(path) : Buffer.alloc(0);
 		const result = await writeExif(buff, options);
-		return nima.sendMessage(jid, { sticker: { url: result }, ...options }, { quoted, ephemeralExpiration: quoted?.expiration || quoted?.metadata?.ephemeralDuration || store?.messages[jid]?.array?.slice(-1)[0]?.metadata?.ephemeralDuration || 0 });
+		return NIMA.sendMessage(jid, { sticker: { url: result }, ...options }, { quoted, ephemeralExpiration: quoted?.expiration || quoted?.metadata?.ephemeralDuration || store?.messages[jid]?.array?.slice(-1)[0]?.metadata?.ephemeralDuration || 0 });
 	}
 	
-	nima.downloadMediaMessage = async (message) => {
+	NIMA.downloadMediaMessage = async (message) => {
 		const msg = message.msg || message;
 		const mime = msg.mimetype || '';
 		const messageType = (message.type || mime.split('/')[0]).replace(/Message/gi, '');
@@ -511,15 +511,15 @@ async function Solving(nima, store) {
 		return buffer
 	}
 	
-	nima.downloadAndSaveMediaMessage = async (message, filename, attachExtension = true) => {
-		const buffer = await nima.downloadMediaMessage(message);
+	NIMA.downloadAndSaveMediaMessage = async (message, filename, attachExtension = true) => {
+		const buffer = await NIMA.downloadMediaMessage(message);
 		const type = await FileType.fromBuffer(buffer);
 		const trueFileName = attachExtension ? `./database/sampah/${filename ? filename : Date.now()}.${type.ext}` : filename;
 		await fs.promises.writeFile(trueFileName, buffer);
 		return trueFileName;
 	}
 	
-	nima.getFile = async (PATH, save) => {
+	NIMA.getFile = async (PATH, save) => {
 		let res;
 		let filename;
 		let data = Buffer.isBuffer(PATH) ? PATH : /^data:.*?\/.*?;base64,/i.test(PATH) ? Buffer.from(PATH.split`,`[1], 'base64') : /^https?:\/\//.test(PATH) ? await (res = await getBuffer(PATH)) : fs.existsSync(PATH) ? (filename = PATH, fs.readFileSync(PATH)) : typeof PATH === 'string' ? PATH : Buffer.alloc(0)
@@ -535,28 +535,28 @@ async function Solving(nima, store) {
 		}
 	}
 	
-	nima.appendResponseMessage = async (m, text) => {
-		let apb = await generateWAMessage(m.chat, { text, mentions: m.mentionedJid }, { userJid: nima.user.id, quoted: m.quoted && m.quoted.fakeObj, ephemeralExpiration: m.expiration || m?.metadata?.ephemeralDuration || store?.messages[m.chat]?.array?.slice(-1)[0]?.metadata?.ephemeralDuration || 0 });
+	NIMA.appendResponseMessage = async (m, text) => {
+		let apb = await generateWAMessage(m.chat, { text, mentions: m.mentionedJid }, { userJid: NIMA.user.id, quoted: m.quoted && m.quoted.fakeObj, ephemeralExpiration: m.expiration || m?.metadata?.ephemeralDuration || store?.messages[m.chat]?.array?.slice(-1)[0]?.metadata?.ephemeralDuration || 0 });
 		apb.key = m.key
 		apb.key.id = [...Array(32)].map(() => '0123456789ABCDEF'[Math.floor(Math.random() * 16)]).join('');
-		apb.key.fromMe = areJidsSameUser(m.sender, nima.user.id);
+		apb.key.fromMe = areJidsSameUser(m.sender, NIMA.user.id);
 		if (m.isGroup) apb.participant = m.sender;
-		nima.ev.emit('messages.upsert', {
+		NIMA.ev.emit('messages.upsert', {
 			...m,
 			messages: [proto.WebMessageInfo.fromObject(apb)],
 			type: 'append'
 		});
 	}
 	
-	nima.sendMedia = async (jid, path, fileName = '', caption = '', quoted = '', options = {}) => {
-		const { mime, data, filename } = await nima.getFile(path, true);
-		const botNumber = nima.decodeJid(nima.user.id);
+	NIMA.sendMedia = async (jid, path, fileName = '', caption = '', quoted = '', options = {}) => {
+		const { mime, data, filename } = await NIMA.getFile(path, true);
+		const botNumber = NIMA.decodeJid(NIMA.user.id);
 		const isWebpSticker = options.asSticker || /webp/.test(mime);
 		let type = 'document', mimetype = mime, pathFile = filename;
 		if (isWebpSticker) {
 			pathFile = await writeExif(data, {
 				packname: options.packname || db?.set?.[botNumber]?.packname || 'Bot WhatsApp',
-				author: options.author || db?.set?.[botNumber]?.author || 'nima',
+				author: options.author || db?.set?.[botNumber]?.author || 'NIMA',
 				categories: options.categories || [],
 			})
 			await fs.unlinkSync(filename);
@@ -566,12 +566,12 @@ async function Solving(nima, store) {
 			type = mime.split('/')[0];
 			mimetype = type == 'video' ? 'video/mp4' : type == 'audio' ? 'audio/mpeg' : mime
 		}
-		let anu = await nima.sendMessage(jid, { [type]: { url: pathFile }, caption, mimetype, fileName, ...options }, { quoted, ephemeralExpiration: quoted?.expiration || quoted?.metadata?.ephemeralDuration || store?.messages[jid]?.array?.slice(-1)[0]?.metadata?.ephemeralDuration || 0, ...options });
+		let anu = await NIMA.sendMessage(jid, { [type]: { url: pathFile }, caption, mimetype, fileName, ...options }, { quoted, ephemeralExpiration: quoted?.expiration || quoted?.metadata?.ephemeralDuration || store?.messages[jid]?.array?.slice(-1)[0]?.metadata?.ephemeralDuration || 0, ...options });
 		await fs.unlinkSync(pathFile);
 		return anu;
 	}
 	
-	nima.sendAlbumMessage = async (jid, content = {}, options = {}) => {
+	NIMA.sendAlbumMessage = async (jid, content = {}, options = {}) => {
 		const { album, mentions, contextInfo, ...others } = content;
 		for (const media of album) {
 			if (!media.image && !media.video) throw new TypeError(`album[i] must have image or video property`);
@@ -583,21 +583,21 @@ async function Solving(nima, store) {
 				expectedVideoCount: album.filter(m => m.video).length,
 			}
 		}, {});
-		await nima.relayMessage(jid, medias.message, { messageId: medias.key.id });
+		await NIMA.relayMessage(jid, medias.message, { messageId: medias.key.id });
 		for (const media of album) {
-			const msg = await generateWAMessage(jid, { ...others, ...media }, { upload: nima.waUploadToServer });
+			const msg = await generateWAMessage(jid, { ...others, ...media }, { upload: NIMA.waUploadToServer });
 			msg.message.messageContextInfo = {
 				messageAssociation: {
 					associationType: 1,
 					parentMessageKey: medias.key
 				}
 			}
-			await nima.relayMessage(jid, msg.message, { messageId: msg.key.id });
+			await NIMA.relayMessage(jid, msg.message, { messageId: msg.key.id });
 		}
 		return medias;
 	}
 	
-	nima.sendListMsg = async (jid, content = {}, options = {}) => {
+	NIMA.sendListMsg = async (jid, content = {}, options = {}) => {
 		const { text, caption, footer = '', title, subtitle, ai, contextInfo = {}, buttons = [], mentions = [], ...media } = content;
 		const msg = await generateWAMessageFromContent(jid, {
 			viewOnceMessage: {
@@ -614,7 +614,7 @@ async function Solving(nima, store) {
 							subtitle,
 							hasMediaAttachment: Object.keys(media).length > 0,
 							...(media && typeof media === 'object' && Object.keys(media).length > 0 ? await generateWAMessageContent(media, {
-								upload: nima.waUploadToServer
+								upload: NIMA.waUploadToServer
 							}) : {})
 						}),
 						nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
@@ -641,7 +641,7 @@ async function Solving(nima, store) {
 				}
 			}
 		}, {});
-		const hasil = await nima.relayMessage(msg.key.remoteJid, msg.message, {
+		const hasil = await NIMA.relayMessage(msg.key.remoteJid, msg.message, {
 			messageId: msg.key.id,
 			additionalNodes: [{
 				tag: 'biz',
@@ -664,7 +664,7 @@ async function Solving(nima, store) {
 		return hasil
 	}
 	
-	nima.sendButtonMsg = async (jid, content = {}, options = {}) => {
+	NIMA.sendButtonMsg = async (jid, content = {}, options = {}) => {
 		const { text, caption, footer = '', headerType = 1, ai, contextInfo = {}, buttons = [], mentions = [], ...media } = content;
 		const msg = await generateWAMessageFromContent(jid, {
 			viewOnceMessage: {
@@ -675,7 +675,7 @@ async function Solving(nima, store) {
 					},
 					buttonsMessage: {
 						...(media && typeof media === 'object' && Object.keys(media).length > 0 ? await generateWAMessageContent(media, {
-							upload: nima.waUploadToServer
+							upload: NIMA.waUploadToServer
 						}) : {}),
 						contentText: text || caption || '',
 						footerText: footer,
@@ -697,7 +697,7 @@ async function Solving(nima, store) {
 				}
 			}
 		}, {});
-		const hasil = await nima.relayMessage(msg.key.remoteJid, msg.message, {
+		const hasil = await NIMA.relayMessage(msg.key.remoteJid, msg.message, {
 			messageId: msg.key.id,
 			additionalNodes: [{
 				tag: 'biz',
@@ -720,13 +720,13 @@ async function Solving(nima, store) {
 		return hasil
 	}
 	
-	nima.newsletterMsg = async (key, content = {}, timeout = 5000) => {
+	NIMA.newsletterMsg = async (key, content = {}, timeout = 5000) => {
 		const { type: rawType = 'INFO', name, description = '', picture = null, react, id, newsletter_id = key, ...media } = content;
 		const type = rawType.toUpperCase();
 		if (react) {
 			if (!(newsletter_id.endsWith('@newsletter') || !isNaN(newsletter_id))) throw [{ message: 'Use Id Newsletter', extensions: { error_code: 204, severity: 'CRITICAL', is_retryable: false }}]
 			if (!id) throw [{ message: 'Use Id Newsletter Message', extensions: { error_code: 204, severity: 'CRITICAL', is_retryable: false }}]
-			const hasil = await nima.query({
+			const hasil = await NIMA.query({
 				tag: 'message',
 				attrs: {
 					to: key,
@@ -743,8 +743,8 @@ async function Solving(nima, store) {
 			});
 			return hasil
 		} else if (media && typeof media === 'object' && Object.keys(media).length > 0) {
-			const msg = await generateWAMessageContent(media, { upload: nima.waUploadToServer });
-			const anu = await nima.query({
+			const msg = await generateWAMessageContent(media, { upload: NIMA.waUploadToServer });
+			const anu = await NIMA.query({
 				tag: 'message',
 				attrs: { to: newsletter_id, type: 'text' in media ? 'text' : 'media' },
 				content: [{
@@ -756,7 +756,7 @@ async function Solving(nima, store) {
 			return anu
 		} else {
 			if ((/(FOLLOW|UNFOLLOW|DELETE)/.test(type)) && !(newsletter_id.endsWith('@newsletter') || !isNaN(newsletter_id))) return [{ message: 'Use Id Newsletter', extensions: { error_code: 204, severity: 'CRITICAL', is_retryable: false }}]
-			const _query = await nima.query({
+			const _query = await NIMA.query({
 				tag: 'iq',
 				attrs: {
 					to: 's.whatsapp.net',
@@ -779,9 +779,9 @@ async function Solving(nima, store) {
 		}
 	}
 	
-	nima.sendCarouselMsg = async (jid, body = '', footer = '', cards = [], options = {}) => {
+	NIMA.sendCarouselMsg = async (jid, body = '', footer = '', cards = [], options = {}) => {
 		async function getImageMsg(url) {
-			const { imageMessage } = await generateWAMessageContent({ image: { url } }, { upload: nima.waUploadToServer });
+			const { imageMessage } = await generateWAMessageContent({ image: { url } }, { upload: NIMA.waUploadToServer });
 			return imageMessage;
 		}
 		const cardPromises = cards.map(async (a) => {
@@ -821,29 +821,29 @@ async function Solving(nima, store) {
 				}
 			}
 		}, {});
-		const hasil = await nima.relayMessage(msg.key.remoteJid, msg.message, { messageId: msg.key.id });
+		const hasil = await NIMA.relayMessage(msg.key.remoteJid, msg.message, { messageId: msg.key.id });
 		return hasil
 	}
 	
-	if (nima.user && nima.user.id) {
-		const botNumber = nima.decodeJid(nima.user.id);
+	if (NIMA.user && NIMA.user.id) {
+		const botNumber = NIMA.decodeJid(NIMA.user.id);
 		if (global.db?.set[botNumber]) {
-			nima.public = global.db.set[botNumber].public
-		} else nima.public = true
-	} else nima.public = true
+			NIMA.public = global.db.set[botNumber].public
+		} else NIMA.public = true
+	} else NIMA.public = true
 
-	return nima
+	return NIMA
 }
 
 /*
-	* Create By nima
+	* Create By NIMA
 	* Follow https://github.com/Nimeshamadhushan
 	* Whatsapp : https://chat.whatsapp.com/HLBP338VvUC0ms5NqCkSSO?mode=ac_t
 */
 
-async function Serialize(nima, msg, store) {
-	const botLid = nima.decodeJid(nima.user.lid);
-	const botNumber = nima.decodeJid(nima.user.id);
+async function Serialize(NIMA, msg, store) {
+	const botLid = NIMA.decodeJid(NIMA.user.lid);
+	const botNumber = NIMA.decodeJid(NIMA.user.id);
 	const m = { ...msg };
 	if (!m) return m
 	if (m.key) {
@@ -852,13 +852,13 @@ async function Serialize(nima, msg, store) {
 		m.fromMe = m.key.fromMe
 		m.isBot = ['HSK', 'BAE', 'B1E', '3EB0', 'B24E', 'WA'].some(a => m.id.startsWith(a) && [12, 16, 20, 22, 40].includes(m.id.length)) || /(.)\1{5,}|[^a-zA-Z0-9]|[^0-9A-F]/.test(m.id) || false
 		m.isGroup = m.chat.endsWith('@g.us')
-		if (!m.isGroup && m.chat.endsWith('@lid')) m.chat = nima.findJidByLid(m.chat, store) || m.chat;
-		m.sender = nima.decodeJid(m.fromMe && nima.user.id || m.key.participant || m.chat || '')
+		if (!m.isGroup && m.chat.endsWith('@lid')) m.chat = NIMA.findJidByLid(m.chat, store) || m.chat;
+		m.sender = NIMA.decodeJid(m.fromMe && NIMA.user.id || m.key.participant || m.chat || '')
 		if (m.isGroup) {
-			if (!store.groupMetadata) store.groupMetadata = await nima.groupFetchAllParticipating().catch(e => ({}));
-			let metadata = store.groupMetadata[m.chat] ? store.groupMetadata[m.chat] : (store.groupMetadata[m.chat] = await nima.groupMetadata(m.chat).catch(e => ({})))
+			if (!store.groupMetadata) store.groupMetadata = await NIMA.groupFetchAllParticipating().catch(e => ({}));
+			let metadata = store.groupMetadata[m.chat] ? store.groupMetadata[m.chat] : (store.groupMetadata[m.chat] = await NIMA.groupMetadata(m.chat).catch(e => ({})))
 			if (!metadata) {
-				metadata = await nima.groupMetadata(m.chat).catch(e => ({}))
+				metadata = await NIMA.groupMetadata(m.chat).catch(e => ({}))
 				store.groupMetadata[m.chat] = metadata
 			}
 			m.metadata = metadata
@@ -868,7 +868,7 @@ async function Serialize(nima, msg, store) {
 				m.key.participant = m.sender = participant?.id || m.sender;
 				m.metadata.owner = m.metadata?.participants?.find(p => p.lid === m.metadata.owner)?.id || m.metadata.owner;
 				m.metadata.subjectOwner = m.metadata?.participants?.find(p => p.lid === m.metadata.subjectOwner)?.id || m.metadata.subjectOwner;
-				store.contacts[m.sender] = { ...store.contacts[m.sender], id: m.sender, lid: m.fromMe && nima.user.lid || participant?.lid || m.sender, name: m.pushName };
+				store.contacts[m.sender] = { ...store.contacts[m.sender], id: m.sender, lid: m.fromMe && NIMA.user.lid || participant?.lid || m.sender, name: m.pushName };
 			}
 			m.admins = m.metadata.participants ? (m.metadata.participants.reduce((a, b) => (b.admin ? a.push({ id: b.id, admin: b.admin }) : [...a]) && a, [])) : []
 			m.isAdmin = m.admins?.some((b) => b.id === m.sender) || false
@@ -907,21 +907,21 @@ async function Serialize(nima, msg, store) {
 			m.quoted.chat = m.msg.contextInfo.remoteJid || m.chat
 			m.quoted.isBot = m.quoted.id ? ['HSK', 'BAE', 'B1E', '3EB0', 'B24E', 'WA'].some(a => m.quoted.id.startsWith(a) && [12, 16, 20, 22, 40].includes(m.quoted.id.length)) || /(.)\1{5,}|[^a-zA-Z0-9]|[^0-9A-F]/.test(m.quoted.id) : false
 			if (m.msg?.contextInfo?.participant?.endsWith('@lid')) m.msg.contextInfo.participant =  m?.metadata?.participants?.find(a => a.lid === m.msg.contextInfo.participant)?.id || m.msg.contextInfo.participant;
-			m.quoted.sender = nima.decodeJid(m.msg.contextInfo.participant)
-			m.quoted.fromMe = m.quoted.sender === nima.decodeJid(nima.user.id)
+			m.quoted.sender = NIMA.decodeJid(m.msg.contextInfo.participant)
+			m.quoted.fromMe = m.quoted.sender === NIMA.decodeJid(NIMA.user.id)
 			m.quoted.text = m.quoted.caption || m.quoted.conversation || m.quoted.contentText || m.quoted.selectedDisplayText || m.quoted.title || ''
 			m.quoted.msg = extractMessageContent(m.quoted.message[m.quoted.type]) || m.quoted.message[m.quoted.type]
 			m.quoted.mentionedJid = m.quoted?.msg?.contextInfo?.mentionedJid || []
 			m.quoted.body = m.quoted.msg?.text || m.quoted.msg?.caption || m.quoted?.message?.conversation || m.quoted.msg?.selectedButtonId || m.quoted.msg?.singleSelectReply?.selectedRowId || m.quoted.msg?.selectedId || m.quoted.msg?.contentText || m.quoted.msg?.selectedDisplayText || m.quoted.msg?.title || m.quoted?.msg?.name || ''
 			m.getQuotedObj = async () => {
 				if (!m.quoted.id) return false
-				let q = await store.loadMessage(m.chat, m.quoted.id, nima)
-				return await Serialize(nima, q, store)
+				let q = await store.loadMessage(m.chat, m.quoted.id, NIMA)
+				return await Serialize(NIMA, q, store)
 			}
 			m.quoted.key = {
 				remoteJid: m.msg?.contextInfo?.remoteJid || m.chat,
 				participant: m.quoted.sender,
-				fromMe: areJidsSameUser(nima.decodeJid(m.msg?.contextInfo?.participant), nima.decodeJid(nima?.user?.id)),
+				fromMe: areJidsSameUser(NIMA.decodeJid(m.msg?.contextInfo?.participant), NIMA.decodeJid(NIMA?.user?.id)),
 				id: m.msg?.contextInfo?.stanzaId
 			}
 			m.quoted.isGroup = m.quoted.chat.endsWith('@g.us')
@@ -949,9 +949,9 @@ async function Serialize(nima, msg, store) {
 				message: m.quoted,
 				...(m.isGroup ? { participant: m.quoted.sender } : {})
 			})
-			m.quoted.download = () => nima.downloadMediaMessage(m.quoted)
+			m.quoted.download = () => NIMA.downloadMediaMessage(m.quoted)
 			m.quoted.delete = () => {
-				nima.sendMessage(m.quoted.chat, {
+				NIMA.sendMessage(m.quoted.chat, {
 					delete: {
 						remoteJid: m.quoted.chat,
 						fromMe: m.isBotAdmins ? false : true,
@@ -963,31 +963,31 @@ async function Serialize(nima, msg, store) {
 		}
 	}
 	
-	m.download = () => nima.downloadMediaMessage(m)
+	m.download = () => NIMA.downloadMediaMessage(m)
 	
-	m.copy = () => Serialize(nima, proto.WebMessageInfo.fromObject(proto.WebMessageInfo.toObject(m)))
+	m.copy = () => Serialize(NIMA, proto.WebMessageInfo.fromObject(proto.WebMessageInfo.toObject(m)))
 	
-	m.react = (u) => nima.sendMessage(m.chat, { react: { text: u, key: m.key }})
+	m.react = (u) => NIMA.sendMessage(m.chat, { react: { text: u, key: m.key }})
 	
 	m.reply = async (content, options = {}) => {
 		const { quoted = m, chat = m.chat, caption = '', ephemeralExpiration = m.expiration || m?.metadata?.ephemeralDuration || store?.messages[m.chat]?.array?.slice(-1)[0]?.metadata?.ephemeralDuration || 0, mentions = (typeof content === 'string' || typeof content.text === 'string' || typeof content.caption === 'string') ? [...(content.text || content.caption || content).matchAll(/@(\d{0,16})/g)].map(v => v[1] + '@s.whatsapp.net') : [], ...validate } = options;
 		if (typeof content === 'object') {
-			return nima.sendMessage(chat, content, { ...options, quoted, ephemeralExpiration })
+			return NIMA.sendMessage(chat, content, { ...options, quoted, ephemeralExpiration })
 		} else if (typeof content === 'string') {
 			try {
 				if (/^https?:\/\//.test(content)) {
 					const data = await axios.get(content, { responseType: 'arraybuffer' });
 					const mime = data.headers['content-type'] || (await FileType.fromBuffer(data.data)).mime
 					if (/gif|image|video|audio|pdf|stream/i.test(mime)) {
-						return nima.sendMedia(chat, data.data, '', caption, quoted, content)
+						return NIMA.sendMedia(chat, data.data, '', caption, quoted, content)
 					} else {
-						return nima.sendMessage(chat, { text: content, mentions, ...options }, { quoted, ephemeralExpiration })
+						return NIMA.sendMessage(chat, { text: content, mentions, ...options }, { quoted, ephemeralExpiration })
 					}
 				} else {
-					return nima.sendMessage(chat, { text: content, mentions, ...options }, { quoted, ephemeralExpiration })
+					return NIMA.sendMessage(chat, { text: content, mentions, ...options }, { quoted, ephemeralExpiration })
 				}
 			} catch (e) {
-				return nima.sendMessage(chat, { text: content, mentions, ...options }, { quoted, ephemeralExpiration })
+				return NIMA.sendMessage(chat, { text: content, mentions, ...options }, { quoted, ephemeralExpiration })
 			}
 		}
 	}
